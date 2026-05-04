@@ -17,23 +17,6 @@ const SupervisorDashboard = () => {
   const [loading,  setLoading]  = useState(true);
   const [filter,   setFilter]   = useState('active');
 
-  useEffect(() => {
-    fetchStats();
-    fetchBookings();
-  }, [filter, fetchStats, fetchBookings]);
-
-  useEffect(() => {
-    if (socket) {
-      const handleNewBooking = () => {
-        toast.success('New booking created!');
-        fetchStats();
-        fetchBookings();
-      };
-      on('new-booking', handleNewBooking);
-      return () => { off('new-booking', handleNewBooking); };
-    }
-  }, [socket, on, off, fetchStats, fetchBookings]);
-
   const fetchStats = useCallback(async () => {
     try {
       const response = await api.get('/bookings/stats/overview');
@@ -51,6 +34,23 @@ const SupervisorDashboard = () => {
     } catch { toast.error('Failed to fetch bookings'); }
     finally { setLoading(false); }
   }, [filter]);
+
+  useEffect(() => {
+    fetchStats();
+    fetchBookings();
+  }, [filter, fetchStats, fetchBookings]);
+
+  useEffect(() => {
+    if (socket) {
+      const handleNewBooking = () => {
+        toast.success('New booking created!');
+        fetchStats();
+        fetchBookings();
+      };
+      on('new-booking', handleNewBooking);
+      return () => { off('new-booking', handleNewBooking); };
+    }
+  }, [socket, on, off, fetchStats, fetchBookings]);
 
   const handleLogout = () => {
     logout();

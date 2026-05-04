@@ -10,7 +10,3 @@ npm install
 cd ../frontend
 npm install
 npm run build
-
-# Copy frontend build to backend public folder
-mkdir -p ../backend/public
-cp -r build/* ../backend/public/

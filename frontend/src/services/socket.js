@@ -1,9 +1,12 @@
 import { io } from 'socket.io-client';
 
-// Default to localhost:5000 if REACT_APP_SOCKET_URL is not set
+// In production the socket server is the same origin as the page.
+// In development it's localhost:5000 (separate backend port).
 const SOCKET_URL =
   process.env.REACT_APP_SOCKET_URL ||
-  'https://growmoreapp2-0.onrender.com';
+  (process.env.NODE_ENV === 'production'
+    ? window.location.origin          // e.g. https://bonitovaletapp.onrender.com
+    : 'http://localhost:5000');
 
 let socket = null;
 
