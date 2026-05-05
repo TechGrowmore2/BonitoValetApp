@@ -96,8 +96,7 @@ router.post('/customer/request-otp',
         expiry: Date.now() + 10 * 60 * 1000
       });
 
-      // Send OTP via Email (primary)
-      await emailService.sendOTP(phone, otp, 'Customer');
+      // (Email OTP removed because customer login only uses phone number)
 
       // Send OTP via SMS (backup)
       await smsService.sendOTP(phone, otp);
