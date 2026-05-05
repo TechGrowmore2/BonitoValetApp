@@ -3,8 +3,9 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
-const smsService = require('../services/smsService');
-const emailService = require('../services/emailService');
+const smsService      = require('../services/smsService');
+const whatsappService  = require('../services/whatsappService');
+const emailService    = require('../services/emailService');
 
 // Store OTPs temporarily (in production, use Redis)
 const otpStore = new Map();
@@ -100,6 +101,14 @@ router.post('/customer/request-otp',
 
       // Send OTP via SMS (backup)
       await smsService.sendOTP(phone, otp);
+
+      // Send OTP via WhatsApp
+      try {
+        await whatsappService.sendOTP(phone, otp);
+        console.log('✓ OTP WhatsApp sent to:', phone);
+      } catch (waErr) {
+        console.error('✗ OTP WhatsApp failed:', waErr.message);
+      }
 
       res.json({ message: 'OTP sent successfully', mock: !smsService.msg91Enabled });
     } catch (error) {

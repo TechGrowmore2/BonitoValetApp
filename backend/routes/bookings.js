@@ -4,8 +4,9 @@ const { body, validationResult } = require('express-validator');
 const Booking = require('../models/Booking');
 const User = require('../models/User');
 const { auth, authorize } = require('../middleware/auth');
-const smsService = require('../services/smsService');
-const emailService = require('../services/emailService');
+const smsService     = require('../services/smsService');
+const whatsappService = require('../services/whatsappService');
+const emailService   = require('../services/emailService');
 const { upload } = require('../config/imageUpload');
 const { uploadMultipleFiles } = require('../config/googleDrive');
 
@@ -169,9 +170,15 @@ router.post('/',
       console.log('---');
       try {
         await smsService.sendBookingConfirmation(customerPhone, booking.bookingId, accessLink);
-        console.log('✓ Booking confirmation SMS sent successfully to:', customerPhone);
+        console.log('✓ Booking confirmation SMS sent to:', customerPhone);
       } catch (smsError) {
-        console.error('✗ Failed to send SMS to:', customerPhone, smsError.message);
+        console.error('✗ SMS failed:', customerPhone, smsError.message);
+      }
+      try {
+        await whatsappService.sendBookingConfirmation(customerPhone, customerName, booking.bookingId, booking.accessToken);
+        console.log('✓ Booking confirmation WhatsApp sent to:', customerPhone);
+      } catch (waError) {
+        console.error('✗ WhatsApp failed:', customerPhone, waError.message);
       }
 
       // Emit to supervisor dashboard
@@ -417,10 +424,14 @@ router.post('/public',
       // Generate access link for customer to track
       const accessLink = `${process.env.FRONTEND_URL || 'https://growmoreapp2-0.onrender.com'}/customer/access/${booking.accessToken}`;
 
-      // Send SMS confirmation
+      // Send SMS + WhatsApp confirmation
       try {
         await smsService.sendBookingConfirmation(customerPhone, booking.bookingId, accessLink);
       } catch (e) { console.error('SMS failed:', e.message); }
+      try {
+        await whatsappService.sendBookingConfirmation(customerPhone, customerName, booking.bookingId, booking.accessToken);
+        console.log('✓ WhatsApp booking confirmation sent to:', customerPhone);
+      } catch (e) { console.error('WhatsApp failed:', e.message); }
 
       // Send Email if provided
       if (customerEmail) {
@@ -590,13 +601,19 @@ router.post('/:id/estimate-arrival', auth, authorize('driver'), async (req, res)
     console.log('---');
     try {
       await smsService.sendRecallNotification(
-        booking.customer.phone,
-        booking.bookingId,
-        estimatedMinutes
+        booking.customer.phone, booking.bookingId, estimatedMinutes
       );
-      console.log('✓ Recall notification SMS sent successfully to:', booking.customer.phone);
+      console.log('✓ Recall SMS sent to:', booking.customer.phone);
     } catch (smsError) {
-      console.error('✗ Failed to send recall SMS to:', booking.customer.phone, smsError.message);
+      console.error('✗ Recall SMS failed:', smsError.message);
+    }
+    try {
+      await whatsappService.sendRecallNotification(
+        booking.customer.phone, booking.bookingId, estimatedMinutes
+      );
+      console.log('✓ Recall WhatsApp sent to:', booking.customer.phone);
+    } catch (waError) {
+      console.error('✗ Recall WhatsApp failed:', waError.message);
     }
 
     console.log('=== Arrival Time Set Complete ===\n');
@@ -693,13 +710,19 @@ router.post('/:id/arrived', auth, authorize('driver'), async (req, res) => {
     console.log('---');
     try {
       await smsService.sendArrivalNotification(
-        booking.customer.phone,
-        booking.bookingId,
-        otp
+        booking.customer.phone, booking.bookingId, otp
       );
-      console.log('✓ Arrival notification SMS with OTP sent successfully to:', booking.customer.phone);
+      console.log('✓ Arrival SMS sent to:', booking.customer.phone);
     } catch (smsError) {
-      console.error('✗ Failed to send arrival SMS to:', booking.customer.phone, smsError.message);
+      console.error('✗ Arrival SMS failed:', smsError.message);
+    }
+    try {
+      await whatsappService.sendArrivalNotification(
+        booking.customer.phone, booking.bookingId, otp
+      );
+      console.log('✓ Arrival WhatsApp sent to:', booking.customer.phone);
+    } catch (waError) {
+      console.error('✗ Arrival WhatsApp failed:', waError.message);
     }
 
     console.log('=== Driver Arrival Complete ===\n');
@@ -781,6 +804,18 @@ router.post('/:id/verify-complete', auth, authorize('driver'),
         bookingId: booking.bookingId
       });
       console.log('Completion notification sent to customer via socket');
+
+      // Send thank you WhatsApp message
+      try {
+        await whatsappService.sendThankYou(
+          booking.customer.phone,
+          booking.customer.name,
+          booking.bookingId
+        );
+        console.log('✓ Thank you WhatsApp sent to:', booking.customer.phone);
+      } catch (waErr) {
+        console.error('✗ Thank you WhatsApp failed:', waErr.message);
+      }
 
       console.log('=== Booking Completion Process Finished ===\n');
 
