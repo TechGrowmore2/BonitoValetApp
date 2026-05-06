@@ -93,7 +93,7 @@ class WhatsAppService {
   // ─────────────────────────────────────────────────────────────
 
   /**
-   * Template: bonito_otp
+   * Template: bonito_otp_20260506033644
    * Variables: {{1}} = OTP code
    *
    * Message:
@@ -102,11 +102,53 @@ class WhatsAppService {
    * - Team Bonito
    */
   async sendOTP(phone, otp) {
-    return this.sendTemplate(phone, 'bonito_otp', [otp]);
+    const to = this._formatPhone(phone);
+    if (this.enabled) {
+      try {
+        const payload = {
+          recipient_mobile_number: to,
+          customer_name: 'Customer',
+          messages: [{
+            kind: 'template',
+            template: {
+              name: 'bonito_otp_20260506033644',
+              language: 'en',
+              components: [
+                {
+                  type: 'body',
+                  parameters: [{ type: 'text', text: String(otp) }]
+                },
+                {
+                  type: 'button',
+                  sub_type: 'url',
+                  index: '0',
+                  parameters: [{ type: 'text', text: String(otp) }]
+                }
+              ]
+            }
+          }]
+        };
+
+        const response = await axios.post(this.apiUrl, payload, {
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(`✓ WhatsApp [bonito_otp_20260506033644] sent to ${phone}:`, response.data?.id || 'ok');
+        return { success: true, data: response.data };
+      } catch (error) {
+        console.error(`✗ WhatsApp [bonito_otp_20260506033644] failed:`, error.response?.data || error.message);
+        return { success: false };
+      }
+    } else {
+      console.log(`\n📲 MOCK WhatsApp OTP: ${otp} to ${phone}\n`);
+      return { success: true, mock: true };
+    }
   }
 
   /**
-   * Template: bonito_booking_confirmation
+   * Template: bonito_booking_confirmation_20260506035804
    * Body variables:  {{1}} = customerName, {{2}} = bookingId
    * Button (index 0): Visit Website → "Track my car"
    *   Template URL in ChatMitra: https://bonitovaletapp.onrender.com/customer/access/{{1}}
@@ -146,7 +188,7 @@ class WhatsAppService {
           messages: [{
             kind: 'template',
             template: {
-              name: 'bonito_booking_confirmation',
+              name: 'bonito_booking_confirmation_20260506035804',
               language: 'en',
               components: [
                 // Body: {{1}} = customerName, {{2}} = bookingId
@@ -178,18 +220,18 @@ class WhatsAppService {
           }
         });
 
-        console.log(`✓ WhatsApp [bonito_booking_confirmation] sent to ${phone}:`, response.data?.id || 'ok');
+        console.log(`✓ WhatsApp [bonito_booking_confirmation_20260506035804] sent to ${phone}:`, response.data?.id || 'ok');
         return { success: true, data: response.data };
       } catch (error) {
         const errData = error.response?.data || error.message;
-        console.error(`✗ WhatsApp [bonito_booking_confirmation] to ${phone} failed:`, errData);
+        console.error(`✗ WhatsApp [bonito_booking_confirmation_20260506035804] to ${phone} failed:`, errData);
         return { success: false, error: errData };
       }
     } else {
       // MOCK mode
       console.log('\n📲 MOCK WhatsApp:');
       console.log(`   To       : ${to}`);
-      console.log(`   Template : bonito_booking_confirmation`);
+      console.log(`   Template : bonito_booking_confirmation_20260506035804`);
       console.log(`   {{1}}    : ${customerName || 'Customer'}`);
       console.log(`   {{2}}    : ${bookingId}`);
       console.log(`   [Button] : Track my car → ${trackingLink}`);
@@ -199,7 +241,7 @@ class WhatsAppService {
   }
 
   /**
-   * Template: bonito_recall_notification
+   * Template: bonito_recall_notification_20260506040401
    * Variables: {{1}} = bookingId, {{2}} = estimatedMinutes
    *
    * Message:
@@ -212,14 +254,14 @@ class WhatsAppService {
    * - Team Bonito
    */
   async sendRecallNotification(phone, bookingId, estimatedMinutes) {
-    return this.sendTemplate(phone, 'bonito_recall_notification', [
+    return this.sendTemplate(phone, 'bonito_recall_notification_20260506040401', [
       bookingId,
       String(estimatedMinutes)
     ]);
   }
 
   /**
-   * Template: bonito_arrival_otp
+   * Template: bonito_arrival_otp_20260506040618
    * Variables: {{1}} = bookingId, {{2}} = OTP
    *
    * Message:
@@ -233,11 +275,11 @@ class WhatsAppService {
    * - Team Bonito
    */
   async sendArrivalNotification(phone, bookingId, otp) {
-    return this.sendTemplate(phone, 'bonito_arrival_otp', [bookingId, otp]);
+    return this.sendTemplate(phone, 'bonito_arrival_otp_20260506040618', [bookingId, otp]);
   }
 
   /**
-   * Template: bonito_thank_you
+   * Template: bonito_thank_you_20260506043146
    * Variables: {{1}} = customerName, {{2}} = bookingId
    *
    * Message:
@@ -250,7 +292,7 @@ class WhatsAppService {
    * – Team Bonito 🚗
    */
   async sendThankYou(phone, customerName, bookingId) {
-    return this.sendTemplate(phone, 'bonito_thank_you', [
+    return this.sendTemplate(phone, 'bonito_thank_you_20260506043146', [
       customerName || 'Valued Customer',
       bookingId
     ]);
