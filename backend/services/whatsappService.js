@@ -93,7 +93,7 @@ class WhatsAppService {
   // ─────────────────────────────────────────────────────────────
 
   /**
-   * Template: bonito_otp_20260506033644
+   * Template: bonito_otp
    * Variables: {{1}} = OTP code
    *
    * Message:
@@ -111,7 +111,7 @@ class WhatsAppService {
           messages: [{
             kind: 'template',
             template: {
-              name: 'bonito_otp_20260506033644',
+              name: 'bonito_otp',
               language: 'en',
               components: [
                 {
@@ -135,10 +135,10 @@ class WhatsAppService {
             'Content-Type': 'application/json'
           }
         });
-        console.log(`✓ WhatsApp [bonito_otp_20260506033644] sent to ${phone}:`, response.data?.id || 'ok');
+        console.log(`✓ WhatsApp [bonito_otp] sent to ${phone}:`, response.data?.id || 'ok');
         return { success: true, data: response.data };
       } catch (error) {
-        console.error(`✗ WhatsApp [bonito_otp_20260506033644] failed:`, error.response?.data || error.message);
+        console.error(`✗ WhatsApp [bonito_otp] failed:`, error.response?.data || error.message);
         return { success: false };
       }
     } else {
@@ -148,7 +148,7 @@ class WhatsAppService {
   }
 
   /**
-   * Template: bonito_booking_confirmation_20260506035804
+   * Template: bonito_booking_confirmation
    * Body variables:  {{1}} = customerName, {{2}} = bookingId
    * Button (index 0): Visit Website → "Track my car"
    *   Template URL in ChatMitra: https://bonitovaletapp.onrender.com/customer/access/{{1}}
@@ -188,7 +188,7 @@ class WhatsAppService {
           messages: [{
             kind: 'template',
             template: {
-              name: 'bonito_booking_confirmation_20260506035804',
+              name: 'bonito_booking_confirmation',
               language: 'en',
               components: [
                 // Body: {{1}} = customerName, {{2}} = bookingId
@@ -220,18 +220,18 @@ class WhatsAppService {
           }
         });
 
-        console.log(`✓ WhatsApp [bonito_booking_confirmation_20260506035804] sent to ${phone}:`, response.data?.id || 'ok');
+        console.log(`✓ WhatsApp [bonito_booking_confirmation] sent to ${phone}:`, response.data?.id || 'ok');
         return { success: true, data: response.data };
       } catch (error) {
         const errData = error.response?.data || error.message;
-        console.error(`✗ WhatsApp [bonito_booking_confirmation_20260506035804] to ${phone} failed:`, errData);
+        console.error(`✗ WhatsApp [bonito_booking_confirmation] to ${phone} failed:`, errData);
         return { success: false, error: errData };
       }
     } else {
       // MOCK mode
       console.log('\n📲 MOCK WhatsApp:');
       console.log(`   To       : ${to}`);
-      console.log(`   Template : bonito_booking_confirmation_20260506035804`);
+      console.log(`   Template : bonito_booking_confirmation`);
       console.log(`   {{1}}    : ${customerName || 'Customer'}`);
       console.log(`   {{2}}    : ${bookingId}`);
       console.log(`   [Button] : Track my car → ${trackingLink}`);
@@ -241,7 +241,7 @@ class WhatsAppService {
   }
 
   /**
-   * Template: bonito_recall_notification_20260506040401
+   * Template: bonito_recall_notification
    * Variables: {{1}} = bookingId, {{2}} = estimatedMinutes
    *
    * Message:
@@ -254,14 +254,14 @@ class WhatsAppService {
    * - Team Bonito
    */
   async sendRecallNotification(phone, bookingId, estimatedMinutes) {
-    return this.sendTemplate(phone, 'bonito_recall_notification_20260506040401', [
+    return this.sendTemplate(phone, 'bonito_recall_notification', [
       bookingId,
       String(estimatedMinutes)
     ]);
   }
 
   /**
-   * Template: bonito_arrival_otp_20260506040618
+   * Template: bonito_arrival_otp
    * Variables: {{1}} = bookingId, {{2}} = OTP
    *
    * Message:
@@ -275,11 +275,11 @@ class WhatsAppService {
    * - Team Bonito
    */
   async sendArrivalNotification(phone, bookingId, otp) {
-    return this.sendTemplate(phone, 'bonito_arrival_otp_20260506040618', [bookingId, otp]);
+    return this.sendTemplate(phone, 'bonito_arrival_otp', [bookingId, otp]);
   }
 
   /**
-   * Template: bonito_thank_you_20260506043146
+   * Template: bonito_thank_you
    * Variables: {{1}} = customerName, {{2}} = bookingId
    *
    * Message:
@@ -292,7 +292,7 @@ class WhatsAppService {
    * – Team Bonito 🚗
    */
   async sendThankYou(phone, customerName, bookingId) {
-    return this.sendTemplate(phone, 'bonito_thank_you_20260506043146', [
+    return this.sendTemplate(phone, 'bonito_thank_you', [
       customerName || 'Valued Customer',
       bookingId
     ]);
